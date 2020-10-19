@@ -5,66 +5,116 @@ export default function SearchTwo() {
   const [data, setData] = useState([]);
   const [id, setId] = useState([]);
   const [stats, setStats] = useState([]);
+  const [query, setQuery] = useState("");
+  const [description, setDescription] = useState([]);
 
-  useEffect(() => {
-    const playerStats = () => {
-      fetch(
-        "https://www.balldontlie.io/api/v1/season_averages?season=2018&player_ids[]=140"
-      )
-        .then((response) => response.json())
-        .then((statPayload) => {
-          setStats(statPayload.data);
-        });
-    };
-    playerStats();
-  }, []);
+  // useEffect(() => {
+  //   const playerStats = () => {
+  //     fetch(
+  //       "https://www.balldontlie.io/api/v1/season_averages?season=2018&player_ids[]=140"
+  //     )
+  //       .then((response) => response.json())
+  //       .then((statPayload) => {
+  //         // console.log(statPayload.data);
+  //         // fetch here and then pass { id } `${id}
+  //       });
+  //   };
+  //   playerStats();
+  // }, []);
 
   // can get the id here, want to pass to the other fetch so i can then use the name to search for the season stats
-  useEffect(() => {
+  // can make the search query the players name on line 28
+
+  // This is the
+  // useEffect(() => {
+  // const fetchData = () => {
+  //   fetch(`https://www.balldontlie.io/api/v1/players?search=${query}`)
+  //     .then((response) => response.json())
+  //     .then((payload) => {
+  //       setId(payload.data[0].id);
+  //       const moreIds = payload.data[0].id;
+  //       fetch(
+  //         `https://www.balldontlie.io/api/v1/season_averages?season=2018&player_ids[]=${moreIds}`
+  //       )
+  //         .then((response) => response.json())
+  //         .then((statPayload) => {
+  //           setData(statPayload.data);
+  //           fetch(`https://www.balldontlie.io/api/v1/players/${moreIds}`)
+  //             .then((response) => response.json())
+  //             .then((playerData) => {
+  //               setDescription(playerData);
+  //             });
+  //         });
+  //     });
+  // };
+  // fetchData();
+  // }, []);
+
+  const handleReset = () => {
+    setQuery("");
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
     const fetchData = () => {
-      fetch("https://www.balldontlie.io/api/v1/players?search=durant")
+      fetch(`https://www.balldontlie.io/api/v1/players?search=${query}`)
         .then((response) => response.json())
         .then((payload) => {
-          setData(payload.data);
+          setId(payload.data[0].id);
+          const moreIds = payload.data[0].id;
+          fetch(
+            `https://www.balldontlie.io/api/v1/season_averages?season=2018&player_ids[]=${moreIds}`
+          )
+            .then((response) => response.json())
+            .then((statPayload) => {
+              setData(statPayload.data);
+              fetch(`https://www.balldontlie.io/api/v1/players/${moreIds}`)
+                .then((response) => response.json())
+                .then((playerData) => {
+                  setDescription(playerData);
+                });
+            });
         });
     };
     fetchData();
-  }, []);
+    handleReset();
+  };
 
-  // want to map over the stats and not have to do it like i am, i want to print the key and th value from the array object? use a fir loop?
+  // use Object.keys to map over the array object so don't have to type the whole thing, of all the player stats
+  // map through to get the team stats of the team, like the abbreviation and shit.
 
   return (
     <div>
-      <p>hello</p>
+      <div>
+        <p>Search for a player</p>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+          <button>Submit</button>
+        </form>
+      </div>
+      <p>
+        {description.first_name} {description.last_name}
+        <br />
+        {description.position}
+      </p>
+
       {data.map((item, index) => (
         <ul key={index}>
-          {item.first_name} {item.last_name},{item.position},{" "}
-          {item.team.abbreviation}
+          Assist: {item.ast}
+          3FGA: {item.fg3a}
+          FGM: {item.fgm},
         </ul>
       ))}
-      {stats.map((item, index) => (
-        <ul>
-          <li key={index}>MINS: {item.min}</li>
-          <li>GP: {item.games_played}</li>
-          <li>PTS: {item.pts}</li>
-          <li>ASTS: {item.ast}</li>
-          <li>REBS: {item.reb}</li>
-          <li>STLS: {item.stl}</li>
-          <li>BLKS: {item.blk}</li>
-          <li>DREB: {item.dreb}</li>
-          <li>OREB: {item.oreb}</li>
-          <li>FGMPCT: {item.fg3_pct}</li>
-          <li>FG3A: {item.fg3a}</li>
-          <li>FG3M: {item.fg3m}</li>
-          <li>FGPCT: {item.fg_pct}</li>
-          <li>FGA: {item.fga}</li>
-          <li>FGM: {item.fgm}</li>
-          <li>FTPCT: {item.ft_pct}</li>
-          <li>FTA: {item.fta}</li>
-          <li>FTM: {item.ftm}</li>
-          <li>FOULS: {item.pf}</li>
-          <li>TOVR: {item.turnover}</li>
-        </ul>
+      {Object.keys(stats).map((keyName, i) => (
+        <li key={i}>
+          <span>
+            key: {i} Name: {stats[keyName]}
+          </span>
+        </li>
       ))}
     </div>
   );
