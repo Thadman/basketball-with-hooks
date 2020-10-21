@@ -4,51 +4,11 @@ import { useEffect, useState } from "react";
 export default function SearchTwo() {
   const [data, setData] = useState([]);
   const [id, setId] = useState([]);
-  const [stats, setStats] = useState([]);
   const [query, setQuery] = useState("");
   const [description, setDescription] = useState([]);
-
-  // useEffect(() => {
-  //   const playerStats = () => {
-  //     fetch(
-  //       "https://www.balldontlie.io/api/v1/season_averages?season=2018&player_ids[]=140"
-  //     )
-  //       .then((response) => response.json())
-  //       .then((statPayload) => {
-  //         // console.log(statPayload.data);
-  //         // fetch here and then pass { id } `${id}
-  //       });
-  //   };
-  //   playerStats();
-  // }, []);
-
-  // can get the id here, want to pass to the other fetch so i can then use the name to search for the season stats
-  // can make the search query the players name on line 28
-
-  // This is the
-  // useEffect(() => {
-  // const fetchData = () => {
-  //   fetch(`https://www.balldontlie.io/api/v1/players?search=${query}`)
-  //     .then((response) => response.json())
-  //     .then((payload) => {
-  //       setId(payload.data[0].id);
-  //       const moreIds = payload.data[0].id;
-  //       fetch(
-  //         `https://www.balldontlie.io/api/v1/season_averages?season=2018&player_ids[]=${moreIds}`
-  //       )
-  //         .then((response) => response.json())
-  //         .then((statPayload) => {
-  //           setData(statPayload.data);
-  //           fetch(`https://www.balldontlie.io/api/v1/players/${moreIds}`)
-  //             .then((response) => response.json())
-  //             .then((playerData) => {
-  //               setDescription(playerData);
-  //             });
-  //         });
-  //     });
-  // };
-  // fetchData();
-  // }, []);
+  const [team, setTeam] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [photo, setPhoto] = useState([]);
 
   const handleReset = () => {
     setQuery("");
@@ -61,17 +21,20 @@ export default function SearchTwo() {
         .then((response) => response.json())
         .then((payload) => {
           setId(payload.data[0].id);
+          setTeam(payload.data[0].team);
           const moreIds = payload.data[0].id;
           fetch(
             `https://www.balldontlie.io/api/v1/season_averages?season=2018&player_ids[]=${moreIds}`
           )
             .then((response) => response.json())
             .then((statPayload) => {
+              console.log(statPayload.data);
               setData(statPayload.data);
               fetch(`https://www.balldontlie.io/api/v1/players/${moreIds}`)
                 .then((response) => response.json())
                 .then((playerData) => {
                   setDescription(playerData);
+                  setLoading(true);
                 });
             });
         });
@@ -79,6 +42,18 @@ export default function SearchTwo() {
     fetchData();
     handleReset();
   };
+
+  // const photoFetch = (query) => {
+  //   fetch(`https://nba-players.herokuapp.com/players/${query}`)
+  //     .then((response) => response.json())
+  //     .then((photoPayload) => {
+  //       console.log(photoPayload).catch(function (error) {
+  //         console.log(error);
+  //       });
+  //     });
+  // };
+
+  // photoFetch();
 
   // use Object.keys to map over the array object so don't have to type the whole thing, of all the player stats
   // map through to get the team stats of the team, like the abbreviation and shit.
@@ -96,52 +71,60 @@ export default function SearchTwo() {
           <button>Submit</button>
         </form>
       </div>
-      <p>
-        {description.first_name} {description.last_name}
-        <br />
-        {description.position}
-      </p>
-
-      {data.map((item, index) => (
-        <ul key={index}>
-          Assist: {item.ast}
-          3FGA: {item.fg3a}
-          FGM: {item.fgm},
-        </ul>
-      ))}
-      {Object.keys(stats).map((keyName, i) => (
-        <li key={i}>
-          <span>
-            key: {i} Name: {stats[keyName]}
-          </span>
-        </li>
-      ))}
+      {loading && (
+        <>
+          <div>
+            <p>
+              {description.first_name} {description.last_name} -{" "}
+              {description.height}
+              <br />
+              {description.position}, {team.abbreviation}
+            </p>
+          </div>
+          <div>
+            {data.map((item, index) => (
+              <ul key={index}>
+                2018 Season Stats
+                <br />
+                Assist: {item.ast} , 3FGA: {item.fg3a} , FGM: {item.fgm},
+              </ul>
+            ))}
+            {Object.entries(data[0]).map((keyName, i, value) => (
+              <li key={i}>
+                <span>{keyName}</span>
+              </li>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-// for(let [key, value] of stats) {
-//   console.log(key + ":" value)
-// }
-// ast: 5.86
-// blk: 1.08
-// dreb: 5.95
-// fg3_pct: 0.353
-// fg3a: 4.97
-// fg3m: 1.76
-// fg_pct: 0.521
-// fga: 17.73
-// fgm: 9.24
-// ft_pct: 0.885
-// fta: 6.49
-// ftm: 5.74
-// games_played: 78
-// min: "34:38"
-// oreb: 0.42
-// pf: 1.99
-// player_id: 140
-// pts: 25.99
-// reb: 6.37
-// season: 2018
-// stl: 0.74
-// turnover: 2.88
+// can get the id here, want to pass to the other fetch so i can then use the name to search for the season stats
+// can make the search query the players name on line 28
+
+// This is the componentDidMount. for the final part can have 3 players set up
+// useEffect(() => {
+// const fetchData = () => {
+//   fetch(`https://www.balldontlie.io/api/v1/players?search=${query}`)
+//     .then((response) => response.json())
+//     .then((payload) => {
+//       setId(payload.data[0].id);
+//       const moreIds = payload.data[0].id;
+//       fetch(
+//         `https://www.balldontlie.io/api/v1/season_averages?season=2018&player_ids[]=${moreIds}`
+//       )
+//         .then((response) => response.json())
+//         .then((statPayload) => {
+//           setData(statPayload.data);
+//           fetch(`https://www.balldontlie.io/api/v1/players/${moreIds}`)
+//             .then((response) => response.json())
+//             .then((playerData) => {
+//               setDescription(playerData);
+//             });
+//         });
+//     });
+// };
+// fetchData();
+// }, []);
