@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 
-export default function SearchTwo() {
+export default function SearchTwo(props) {
   const [data, setData] = useState([]);
   const [id, setId] = useState([]);
   const [query, setQuery] = useState("");
@@ -9,9 +9,11 @@ export default function SearchTwo() {
   const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(false);
   const [photo, setPhoto] = useState([]);
+  const [error, setError] = useState(false);
 
   const handleReset = () => {
     setQuery("");
+    setError("");
   };
 
   const handleSubmit = (event) => {
@@ -28,7 +30,6 @@ export default function SearchTwo() {
           )
             .then((response) => response.json())
             .then((statPayload) => {
-              console.log(statPayload.data);
               setData(statPayload.data);
               fetch(`https://www.balldontlie.io/api/v1/players/${moreIds}`)
                 .then((response) => response.json())
@@ -36,24 +37,21 @@ export default function SearchTwo() {
                   setDescription(playerData);
                   setLoading(true);
                 });
+              let myArray = query.split(" ").reverse().join("/");
+              fetch(
+                `https://nba-players.herokuapp.com/players/${myArray}`
+              ).then((response) => setPhoto(response.url));
             });
+        })
+        .catch(function (error) {
+          setError(true);
+          console.log(error);
         });
+      return fetchData;
     };
     fetchData();
     handleReset();
   };
-
-  // const photoFetch = (query) => {
-  //   fetch(`https://nba-players.herokuapp.com/players/${query}`)
-  //     .then((response) => response.json())
-  //     .then((photoPayload) => {
-  //       console.log(photoPayload).catch(function (error) {
-  //         console.log(error);
-  //       });
-  //     });
-  // };
-
-  // photoFetch();
 
   // use Object.keys to map over the array object so don't have to type the whole thing, of all the player stats
   // map through to get the team stats of the team, like the abbreviation and shit.
@@ -79,6 +77,8 @@ export default function SearchTwo() {
               {description.height}
               <br />
               {description.position}, {team.abbreviation}
+              <br />
+              {description.height_feet}ft {description.height_inches}
             </p>
           </div>
           <div>
@@ -89,42 +89,21 @@ export default function SearchTwo() {
                 Assist: {item.ast} , 3FGA: {item.fg3a} , FGM: {item.fgm},
               </ul>
             ))}
-            {Object.entries(data[0]).map((keyName, i, value) => (
+            {Object.entries(data[0]).map((key, i, value) => (
               <li key={i}>
-                <span>{keyName}</span>
+                <span>{key}</span>
               </li>
             ))}
+            <div>
+              <img src={photo} alt="NBAplayer" />
+            </div>
           </div>
         </>
       )}
+      {error && <p>Please enter a valid NBA player</p>}
     </div>
   );
 }
 
 // can get the id here, want to pass to the other fetch so i can then use the name to search for the season stats
-// can make the search query the players name on line 28
-
-// This is the componentDidMount. for the final part can have 3 players set up
-// useEffect(() => {
-// const fetchData = () => {
-//   fetch(`https://www.balldontlie.io/api/v1/players?search=${query}`)
-//     .then((response) => response.json())
-//     .then((payload) => {
-//       setId(payload.data[0].id);
-//       const moreIds = payload.data[0].id;
-//       fetch(
-//         `https://www.balldontlie.io/api/v1/season_averages?season=2018&player_ids[]=${moreIds}`
-//       )
-//         .then((response) => response.json())
-//         .then((statPayload) => {
-//           setData(statPayload.data);
-//           fetch(`https://www.balldontlie.io/api/v1/players/${moreIds}`)
-//             .then((response) => response.json())
-//             .then((playerData) => {
-//               setDescription(playerData);
-//             });
-//         });
-//     });
-// };
-// fetchData();
-// }, []);
+// can make the search query the players name on line
