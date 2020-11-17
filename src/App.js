@@ -1,14 +1,15 @@
 import React from "react";
 import "./App.css";
 import Home from "./components/Home";
-import SearchTwo from "./components/SearchTwo";
+import Search from "./components/Search";
+import SearchForGames from "./components/SearchForGames";
 
 function App() {
   return (
     <div className="App">
-      <h1>Hello</h1>
-      <Home />
-      <SearchTwo />
+      {/* <Home />
+      <Search /> */}
+      <SearchForGames />
     </div>
   );
 }
